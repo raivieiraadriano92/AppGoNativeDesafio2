@@ -2,12 +2,16 @@ import { StyleSheet } from 'react-native';
 import { colors, metrics } from 'styles';
 
 const styles = StyleSheet.create({
-  containerSearch: {
+  containerHeader: {
     backgroundColor: colors.white,
     flexDirection: 'row',
     alignItems: 'center',
     height: 70,
     paddingHorizontal: metrics.basePadding,
+  },
+
+  iconHeader: {
+    color: colors.darker,
   },
 
   inputSearch: {
@@ -17,6 +21,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: metrics.basePadding,
     flex: 1,
     marginRight: metrics.baseMargin * 2,
+    fontSize: 12,
   },
 
   loading: {
