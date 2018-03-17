@@ -20,14 +20,17 @@ const styles = StyleSheet.create({
     color: colors.darker,
   },
 
-  inputSearch: {
-    backgroundColor: colors.lighter,
-    borderRadius: metrics.baseRadius,
-    height: 40,
-    paddingHorizontal: metrics.basePadding,
+  containerTitle: {
+    alignItems: 'center',
+    justifyContent: 'center',
     flex: 1,
-    marginLeft: metrics.baseMargin * 2,
-    fontSize: 12,
+    marginRight: metrics.baseMargin * 2,
+  },
+
+  title: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: colors.darker,
   },
 
   loading: {
@@ -35,7 +38,7 @@ const styles = StyleSheet.create({
   },
 
   listFooter: {
-    height: 10,
+    height: 30,
   },
 });
 

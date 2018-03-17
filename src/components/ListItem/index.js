@@ -6,7 +6,11 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import styles from './styles';
 
-const ListItem = ({ title, subtitle, avatar }) => (
+const ListItem = ({
+  title,
+  subtitle,
+  avatar,
+}) => (
   <View style={styles.container}>
     <Image style={styles.avatar} source={{ uri: avatar }} />
     <View style={styles.containerDescription}>
