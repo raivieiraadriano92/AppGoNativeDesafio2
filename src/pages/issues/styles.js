@@ -34,11 +34,11 @@ const styles = StyleSheet.create({
   },
 
   loading: {
-    marginTop: metrics.basePadding,
+    marginVertical: metrics.basePadding,
   },
 
   listFooter: {
-    height: 30,
+    height: 10,
   },
 });
 

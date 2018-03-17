@@ -36,45 +36,30 @@ export default class Issues extends Component {
     };
   };
 
-  static propTypes = {
-    navigation: PropTypes.shape({
-      state: PropTypes.shape({
-        params: PropTypes.shape({
-          repo: PropTypes.string.isRequired,
-        }).isRequired,
-      }).isRequired,
-    }).isRequired,
-  };
-
   state = {
+    page: 1,
     issues: [],
     loading: true,
     refreshing: false,
-    page: 1,
   }
 
   componentDidMount() {
     this.loadIssues();
   }
 
-  loadIssues = async (refresh = false, loadMore = false) => {
+  loadIssues = async () => {
     try {
-      if (refresh) {
-        await this.setState({
-          page: 1,
-          refreshing: true,
-        });
-      }
+      this.setState({ refreshing: true });
 
-      if (loadMore) {
-        await this.setState({ loading: true });
-      }
+      const { data } = await api.get(`/repos/${this.state.repo}/issues?page=${this.state.page}`);
 
-      const { data } = await api.get(`/repos/${this.props.navigation.state.params.repo}/issues?page=${this.state.page}`);
+      console.log(data);
+
+      const issues = await AsyncStorage.getItem('@Githuber:repos');
 
       this.setState({
-        issues: this.state.page === 1 ? data : [...this.state.issues, ...data],
         page: this.state.page + 1,
+        issues: issues ? JSON.parse(issues) : [],
       });
     } catch (err) {
       Alert.alert('Ops.', 'Não foi possível carregar as Issues deste repositório!');
@@ -87,31 +72,32 @@ export default class Issues extends Component {
   };
 
   renderListItem = ({ item }) => (
-    <ListItem
-      title={item.title}
-      subtitle={item.user.login}
-      avatar={item.user.avatar_url}
-    />
+    <TouchableOpacity onPress={() => { this.goIssues(item); }}>
+      <ListItem
+        title={item.name}
+        subtitle={(item.organization ? item.organization : item.owner).login}
+        avatar={(item.organization ? item.organization : item.owner).avatar_url}
+      />
+    </TouchableOpacity>
   )
 
   renderList = () => (
-    <View>
-      <FlatList
-        data={this.state.issues}
-        keyExtractor={item => String(item.id)}
-        renderItem={this.renderListItem}
-        onRefresh={() => { this.loadIssues(true); }}
-        refreshing={this.state.refreshing}
-        ListFooterComponent={<View style={styles.listFooter}>{this.state.loading ? <ActivityIndicator style={styles.loading} /> : null}</View>}
-        // onEndReached={() => this.loadIssues(false, true)}
-      />
-    </View>
+    <FlatList
+      data={this.state.issues}
+      keyExtractor={item => String(item.id)}
+      renderItem={this.renderListItem}
+      onRefresh={this.loadIssues}
+      refreshing={this.state.refreshing}
+      ListFooterComponent={<View style={styles.listFooter} />}
+    />
   );
 
   render() {
     return (
       <View>
-        {this.state.issues.length ? this.renderList() : null}
+        {this.state.loading
+          ? <ActivityIndicator style={styles.loading} />
+          : this.renderList()}
       </View>
     );
   }

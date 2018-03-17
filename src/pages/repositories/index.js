@@ -121,7 +121,7 @@ export default class Repositories extends Component {
     }
   }
 
-  goIssues = ({ id, full_name }) => {
+  goIssues = ({ full_name }) => {
     const { navigate } = this.props.navigation;
 
     navigate('Issues', { repo: full_name });
