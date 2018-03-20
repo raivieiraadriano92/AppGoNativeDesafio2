@@ -8,9 +8,9 @@ import {
   FlatList,
   AsyncStorage,
   ActivityIndicator,
-  TextInput,
   TouchableOpacity,
   Text,
+  Linking,
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -36,8 +36,33 @@ export default class Issues extends Component {
     };
   };
 
+  static propTypes = {
+    navigation: PropTypes.shape({
+      state: PropTypes.shape({
+        params: PropTypes.shape({
+          repo: PropTypes.string.isRequired,
+        }).isRequired,
+      }).isRequired,
+    }).isRequired,
+  };
+
   state = {
     page: 1,
+    statesIssue: [
+      {
+        key: 'all',
+        label: 'Todas',
+      },
+      {
+        key: 'open',
+        label: 'Abertas',
+      },
+      {
+        key: 'close',
+        label: 'Fechadas',
+      },
+    ],
+    stateIssueSelected: 'all',
     issues: [],
     loading: true,
     refreshing: false,
@@ -47,19 +72,21 @@ export default class Issues extends Component {
     this.loadIssues();
   }
 
-  loadIssues = async () => {
+  loadIssues = async (reloadList = false) => {
     try {
+      const stateIssueSelected = await AsyncStorage.getItem('@Githuber:stateIssueSelected');
+
+      if (stateIssueSelected) {
+        await this.setState({ stateIssueSelected });
+      }
+
       this.setState({ refreshing: true });
 
-      const { data } = await api.get(`/repos/${this.state.repo}/issues?page=${this.state.page}`);
+      const { data } = await api.get(`/repos/${this.props.navigation.state.params.repo}/issues?page=${this.state.page}&state=${this.state.stateIssueSelected}`);
 
-      console.log(data);
-
-      const issues = await AsyncStorage.getItem('@Githuber:repos');
-
-      this.setState({
-        page: this.state.page + 1,
-        issues: issues ? JSON.parse(issues) : [],
+      await this.setState({
+        page: reloadList ? 1 : this.state.page + 1,
+        issues: reloadList ? data : [...this.state.issues, ...data],
       });
     } catch (err) {
       Alert.alert('Ops.', 'Não foi possível carregar as Issues deste repositório!');
@@ -71,12 +98,20 @@ export default class Issues extends Component {
     }
   };
 
+  changeStateFilterIssue = async ({ key }) => {
+    await AsyncStorage.setItem('@Githuber:stateIssueSelected', key);
+
+    await this.setState({ stateIssueSelected: key });
+
+    await this.loadIssues(true);
+  }
+
   renderListItem = ({ item }) => (
-    <TouchableOpacity onPress={() => { this.goIssues(item); }}>
+    <TouchableOpacity onPress={() => { Linking.openURL(item.url); }}>
       <ListItem
-        title={item.name}
-        subtitle={(item.organization ? item.organization : item.owner).login}
-        avatar={(item.organization ? item.organization : item.owner).avatar_url}
+        title={`${item.title.substr(0, 20)}...`}
+        subtitle={item.user.login}
+        avatar={item.user.avatar_url}
       />
     </TouchableOpacity>
   )
@@ -86,8 +121,17 @@ export default class Issues extends Component {
       data={this.state.issues}
       keyExtractor={item => String(item.id)}
       renderItem={this.renderListItem}
-      onRefresh={this.loadIssues}
+      onRefresh={() => { this.loadIssues(true); }}
       refreshing={this.state.refreshing}
+      ListHeaderComponent={(
+        <View style={styles.filters}>
+          {this.state.statesIssue.map(state => (
+            <TouchableOpacity style={styles.filter} onPress={() => { this.changeStateFilterIssue(state); }} key={state.key}>
+              <Text style={[styles.textFilter, (state.key === this.state.stateIssueSelected ? styles.textFilterSelected : {})]}>{state.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
       ListFooterComponent={<View style={styles.listFooter} />}
     />
   );
@@ -95,6 +139,7 @@ export default class Issues extends Component {
   render() {
     return (
       <View>
+
         {this.state.loading
           ? <ActivityIndicator style={styles.loading} />
           : this.renderList()}

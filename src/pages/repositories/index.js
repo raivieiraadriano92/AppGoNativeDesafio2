@@ -52,7 +52,7 @@ export default class Repositories extends Component {
   };
 
   state = {
-    repo: '',
+    repo: 'facebook/react-native',
     searching: false,
     repos: [],
     loading: true,

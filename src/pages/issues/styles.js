@@ -33,6 +33,32 @@ const styles = StyleSheet.create({
     color: colors.darker,
   },
 
+  filters: {
+    borderRadius: metrics.baseRadius,
+    backgroundColor: colors.light,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: metrics.baseMargin * 2,
+    marginTop: metrics.baseMargin * 2,
+  },
+
+  filter: {
+    flex: 1,
+    alignItems: 'center',
+    padding: metrics.basePadding / 2,
+  },
+
+  textFilter: {
+    color: colors.regular,
+    fontSize: 13,
+    opacity: 0.5,
+  },
+
+  textFilterSelected: {
+    fontWeight: 'bold',
+    opacity: 1,
+  },
+
   loading: {
     marginVertical: metrics.basePadding,
   },
